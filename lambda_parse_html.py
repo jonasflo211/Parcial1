@@ -99,7 +99,7 @@ def process_html_file(bucket, key):
 
     today = datetime.today().strftime("%Y-%m-%d")
     output_key = f"{today}/{today}.csv"
-    temp_file = f"/tmp/{today}.csv"
+    temp_file = f"/tmp/{today}.csv" #h
 
     with open(temp_file, "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
