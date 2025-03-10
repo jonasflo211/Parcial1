@@ -68,9 +68,10 @@ def extract_data_from_html(html_content):
 
                 num_habitaciones = listing.select_one(".listing-rooms")
                 num_habitaciones = (
-                    num_habitaciones.text.strip() if num_habitaciones else "N/A"
+                num_habitaciones.text.strip()
+                if num_habitaciones else "N/A"
                 )
-
+                
                 num_banos = listing.select_one(".listing-bathrooms")
                 num_banos = num_banos.text.strip() if num_banos else "N/A"
 
@@ -87,7 +88,7 @@ def extract_data_from_html(html_content):
 
 
 def process_html_file(bucket, key):
-    """Procesa un archivo HTML de S3, extrae los datos y los guarda como CSV."""
+"""Procesa un archivo HTML de S3, extrae los datos y los guarda como CSV."""
     s3 = boto3.client("s3")
     response = s3.get_object(Bucket=bucket, Key=key)
     html_content = response["Body"].read().decode("utf-8")
