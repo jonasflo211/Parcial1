@@ -1,0 +1,58 @@
+{
+    "dev": {
+        "app_function": "download_html.lambda_handler",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "profile_name": "default",
+        "project_name": "parcial",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-8jwijavgz",
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "manage_roles": false,
+        "role_name": "LabRole",
+        "events": [
+            {
+                "function": "download_html.lambda_handler",
+                "expression": "cron(0 9 ? * MON *)"
+            }
+        ]
+    },
+    "dev2": {
+        "app_function": "lambda_parse_html.lambda_handler",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "profile_name": "default",
+        "project_name": "parcial_parse",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-casas-oo-1000",
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "manage_roles": false,
+        "role_name": "LabRole",
+        "events": [
+            {
+                "function": "lambda_parse_html.lambda_handler",
+                "event_source": {
+                    "arn": "arn:aws:s3:::zappa-8jwijavgz",
+                    "events": [
+                        "s3:ObjectCreated:*"
+                    ]
+                }
+            }
+        ]
+    }
+}
+
