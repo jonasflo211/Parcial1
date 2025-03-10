@@ -13,7 +13,8 @@ def clean_price(price_str):
     """Limpia el precio eliminando símbolos y separadores."""
     if not price_str:
         return "N/A"
-    price_str = price_str.replace("COP", "").replace("$", "").replace(".", "").strip()
+    price_str = price_str.replace("COP", "").replace("$", "")
+    price_str = price_str.replace(".", "").strip()
     return price_str
 
 

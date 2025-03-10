@@ -46,7 +46,9 @@ def test_process_html_file(mock_boto):
 
 
 def test_download_html_success():
-    with patch("main.requests.Session.get") as mock_get, patch("main.boto3.client") as mock_boto:
+    with patch("main.requests.Session.get") as mock_get, \
+         patch("main.boto3.client") as mock_boto:
+
         # Simular respuesta exitosa de requests
         mock_response = MagicMock()
         mock_response.status_code = 200
