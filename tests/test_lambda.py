@@ -6,7 +6,7 @@ import requests  # Se añade la importación correcta para requests
 
 
 @pytest.mark.parametrize(
-    "html_content, expected_output",s
+    "html_content, expected_output",
     [
         (
             """<script type='application/ld+json'>
