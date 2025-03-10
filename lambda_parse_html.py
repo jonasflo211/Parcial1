@@ -24,48 +24,66 @@ def extract_data_from_html(html_content):
     listings = []
     today = datetime.today().strftime('%Y-%m-%d')
 
-    # Intentar extraer datos desde JSON-LD si existe
+        # Intentar extraer datos desde JSON-LD si existe
     script_tag = soup.find("script", type="application/ld+json")
     if script_tag:
         try:
             data = json.loads(script_tag.string)
-            properties = data[0].get('about', []) if isinstance(data, list) and data else []
-
+            properties = (
+                data[0].get('about', []) if isinstance(data, list) and data else []
+            )
+    
             for prop in properties:
                 address = prop.get('address', {})
-                barrio = address.get('streetAddress', 'N/A').split(',')[0].strip()
+                barrio = (
+                    address.get('streetAddress', 'N/A').split(',')[0].strip()
+                )
                 description = prop.get('description', '')
-                valor_raw = description.split('$')[-1].split('\n')[0].strip() if '$' in description else 'N/A'
+                valor_raw = (
+                    description.split('$')[-1].split('\n')[0].strip()
+                    if '$' in description else 'N/A'
+                )
                 valor = clean_price(valor_raw)
-
+    
                 habitaciones = prop.get("numberOfBedrooms", "N/A")
                 banos = prop.get("numberOfBathroomsTotal", "N/A")
                 mts2 = prop.get("floorSize", {}).get("value", "N/A")
-
+    
                 listings.append([today, barrio, valor, habitaciones, banos, mts2])
         except (json.JSONDecodeError, KeyError) as e:
             print(f"❌ Error procesando JSON: {str(e)}")
 
-    # Intentar extraer datos desde HTML si no hay JSON-LD
+        # Intentar extraer datos desde HTML si no hay JSON-LD
     if not listings:
         for listing in soup.select(".listing-item"):  # Ajusta el selector según la web real
             try:
-                barrio = (listing.select_one(".listing-location").text.strip() 
-                          if listing.select_one(".listing-location") else "N/A")
-                valor = (clean_price(listing.select_one(".listing-price").text.strip()) 
-                         if listing.select_one(".listing-price") else "N/A")
-                num_habitaciones = (listing.select_one(".listing-rooms").text.strip() 
-                                    if listing.select_one(".listing-rooms") else "N/A")
-                num_banos = (listing.select_one(".listing-bathrooms").text.strip() 
-                             if listing.select_one(".listing-bathrooms") else "N/A")
-                mts2 = (listing.select_one(".listing-area").text.strip() 
-                        if listing.select_one(".listing-area") else "N/A")
-
+                barrio = (
+                    listing.select_one(".listing-location").text.strip()
+                    if listing.select_one(".listing-location") else "N/A"
+                )
+                valor = (
+                    clean_price(listing.select_one(".listing-price").text.strip())
+                    if listing.select_one(".listing-price") else "N/A"
+                )
+                num_habitaciones = (
+                    listing.select_one(".listing-rooms").text.strip()
+                    if listing.select_one(".listing-rooms") else "N/A"
+                )
+                num_banos = (
+                    listing.select_one(".listing-bathrooms").text.strip()
+                    if listing.select_one(".listing-bathrooms") else "N/A"
+                )
+                mts2 = (
+                    listing.select_one(".listing-area").text.strip()
+                    if listing.select_one(".listing-area") else "N/A"
+                )
+    
                 listings.append([today, barrio, valor, num_habitaciones, num_banos, mts2])
             except Exception as e:
                 print(f"⚠️ Error procesando una propiedad: {e}")
-
+    
     return listings
+
 
 
 def process_html_file(bucket, key):
@@ -90,14 +108,3 @@ def process_html_file(bucket, key):
 
     s3.upload_file(temp_file, S3_BUCKET_OUTPUT, output_key)
     print(f"✅ CSV guardado en s3://{S3_BUCKET_OUTPUT}/{output_key}")
-
-
-def lambda_handler(event, context):
-    """Manejador de eventos Lambda que se activa cuando se sube un archivo HTML a S3."""
-    for record in event["Records"]:
-        bucket = record["s3"]["bucket"]["name"]
-        key = record["s3"]["object"]["key"]
-        print(f"📥 Procesando archivo: s3://{bucket}/{key}")
-        process_html_file(bucket, key)
-
-    return {"statusCode": 200, "body": "Procesamiento completado"}

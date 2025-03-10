@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from lambda_parse_html import extract_data_from_html, process_html_file
 from main import download_html
+import requests  # Se añade la importación correcta para requests
 
 
 @pytest.mark.parametrize("html_content, expected_output", [
@@ -36,7 +37,10 @@ def test_process_html_file(mock_boto):
     mock_boto.return_value = mock_s3
 
     mock_s3.get_object.return_value = {
-        "Body": MagicMock(read=lambda: b"<div class='listing-item'><div class='listing-location'>Chapinero</div></div>")
+        "Body": MagicMock(
+    read=lambda: b"<div class='listing-item'><div class='listing-location'>"
+    b"Chapinero</div></div>"
+        )
     }
 
     with patch("builtins.open", MagicMock()):
@@ -69,7 +73,12 @@ def test_download_html_success():
 
 
 def test_download_html_failure():
-    with patch("main.requests.Session.get", side_effect=requests.RequestException("Request failed")), \
+    with patch(
+    "main.requests.Session.get", 
+    side_effect=requests.RequestException(
+        "Request failed"
+    )
+), \
          patch("main.boto3.client") as mock_boto, \
          patch("time.sleep", return_value=None):  # Parchear time.sleep para que no espere
 

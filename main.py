@@ -16,8 +16,8 @@ def download_html():
 
     headers = {
         "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+            "like Gecko) Chrome/120.0.0.0 Safari/537.36"
         ),
         "Referer": "https://www.google.com/",
     }
@@ -38,9 +38,7 @@ def download_html():
                     Body=response.text.encode("utf-8"),  # Convertir a bytes
                     ContentType="text/html"
                 )
-                print(
-                    f"✅ Guardado en S3: s3://{S3_BUCKET}/{today}/{file_name}"
-                )
+                print(f"✅ Guardado en S3: s3://{S3_BUCKET}/{today}/{file_name}")
                 break  # Salir del loop si todo está bien
 
             except RequestException as e:
