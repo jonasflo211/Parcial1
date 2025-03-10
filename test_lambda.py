@@ -87,7 +87,7 @@ def test_download_html_failure():
         "main.requests.Session.get",
         side_effect=requests.RequestException("Request failed"),
     ), patch("main.boto3.client") as mock_boto, \
-        patch("time.sleep", return_value=None):
+            patch("time.sleep", return_value=None):
 
         mock_s3 = MagicMock()
         mock_boto.return_value = mock_s3
