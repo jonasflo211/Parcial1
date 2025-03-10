@@ -15,7 +15,10 @@ def download_html():
     session = requests.Session()  # Mantener cookies y mejorar persistencia
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+            "like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ),
         "Referer": "https://www.google.com/",
     }
 
@@ -23,7 +26,9 @@ def download_html():
         attempt = 0
         while attempt < 3:  # Reintentos en caso de fallo
             try:
-                response = session.get(f"{url}?page={i}", headers=headers, timeout=10)
+                response = session.get(
+                    f"{url}?page={i}", headers=headers, timeout=10
+                )
                 response.raise_for_status()  # Lanza error si el código no es 200 OK
 
                 file_name = f"{today}-page{i}.html"
