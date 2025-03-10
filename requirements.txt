@@ -42,7 +42,7 @@ trio==0.29.0
 trio-websocket==0.12.2
 troposphere==4.9.0
 typing_extensions==4.12.2
-urllib3==2.3.0
+urllib3>=1.25.4,<1.27
 webdriver-manager==4.0.2
 websocket-client==1.8.0
 Werkzeug==3.1.3
