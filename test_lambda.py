@@ -5,25 +5,30 @@ from main import download_html
 import requests  # Se añade la importación correcta para requests
 
 
-@pytest.mark.parametrize("html_content, expected_output", [
-    ("""<script type='application/ld+json'>
-        [{"about": [{"address": {"streetAddress": "Chapinero, Bogotá"},
-        "description": "Apartamento $200000000", "numberOfBedrooms": 2,
-        "numberOfBathroomsTotal": 1, "floorSize": {"value": 60}}]}]
-    </script>""",
-     [["2025-03-10", "Chapinero", "200000000", 2, 1, 60]]),
-
-    ("""<div class='listing-item'>
-          <div class='listing-location'>Chapinero</div>
-          <div class='listing-price'>$200.000.000</div>
-          <div class='listing-rooms'>2</div>
-          <div class='listing-bathrooms'>1</div>
-          <div class='listing-area'>60</div>
-      </div>""",
-     [["2025-03-10", "Chapinero", "200000000", "2", "1", "60"]]),
-
-    ("<html><body>No data</body></html>", [])
-])
+@pytest.mark.parametrize(
+    "html_content, expected_output",
+    [
+        (
+            """<script type='application/ld+json'>
+            [{"about": [{"address": {"streetAddress": "Chapinero, Bogotá"},
+            "description": "Apartamento $200000000", "numberOfBedrooms": 2,
+            "numberOfBathroomsTotal": 1, "floorSize": {"value": 60}}]}]
+            </script>""",
+            [["2025-03-10", "Chapinero", "200000000", 2, 1, 60]],
+        ),
+        (
+            """<div class='listing-item'>
+              <div class='listing-location'>Chapinero</div>
+              <div class='listing-price'>$200.000.000</div>
+              <div class='listing-rooms'>2</div>
+              <div class='listing-bathrooms'>1</div>
+              <div class='listing-area'>60</div>
+          </div>""",
+            [["2025-03-10", "Chapinero", "200000000", "2", "1", "60"]],
+        ),
+        ("<html><body>No data</body></html>", []),
+    ],
+)
 def test_extract_data_from_html(html_content, expected_output):
     """Prueba la extracción de datos desde HTML."""
     result = extract_data_from_html(html_content)
@@ -38,8 +43,11 @@ def test_process_html_file(mock_boto):
 
     mock_s3.get_object.return_value = {
         "Body": MagicMock(
-    read=lambda: b"<div class='listing-item'><div class='listing-location'>"
-    b"Chapinero</div></div>"
+            read=lambda: (
+                b"<div class='listing-item'>"
+                b"<div class='listing-location'>Chapinero</div>"
+                b"</div>"
+            )
         )
     }
 
@@ -50,6 +58,7 @@ def test_process_html_file(mock_boto):
 
 
 def test_download_html_success():
+    """Prueba que la descarga de HTML desde la web funciona correctamente."""
     with patch("main.requests.Session.get") as mock_get, \
          patch("main.boto3.client") as mock_boto:
 
@@ -73,12 +82,11 @@ def test_download_html_success():
 
 
 def test_download_html_failure():
+    """Prueba que la función maneja correctamente fallos en la descarga."""
     with patch(
-    "main.requests.Session.get", 
-    side_effect=requests.RequestException(
-        "Request failed"
-    )
-), \
+        "main.requests.Session.get",
+        side_effect=requests.RequestException("Request failed"),
+    ), \
          patch("main.boto3.client") as mock_boto, \
          patch("time.sleep", return_value=None):  # Parchear time.sleep para que no espere
 
