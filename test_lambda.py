@@ -1,10 +1,7 @@
 import pytest
-import requests
-import time
 from unittest.mock import patch, MagicMock
 from lambda_parse_html import extract_data_from_html, process_html_file
-from main import download_html 
-
+from main import download_html
 
 
 @pytest.mark.parametrize("html_content, expected_output", [
@@ -13,8 +10,8 @@ from main import download_html
         "description": "Apartamento $200000000", "numberOfBedrooms": 2,
         "numberOfBathroomsTotal": 1, "floorSize": {"value": 60}}]}]
     </script>""",
-    [[pytest.approx("2025-03-10"), "Chapinero", "200000000", 2, 1, 60]]),
-    
+     [["2025-03-10", "Chapinero", "200000000", 2, 1, 60]]),
+
     ("""<div class='listing-item'>
           <div class='listing-location'>Chapinero</div>
           <div class='listing-price'>$200.000.000</div>
@@ -22,8 +19,8 @@ from main import download_html
           <div class='listing-bathrooms'>1</div>
           <div class='listing-area'>60</div>
       </div>""",
-    [[pytest.approx("2025-03-10"), "Chapinero", "200000000", "2", "1", "60"]]),
-    
+     [["2025-03-10", "Chapinero", "200000000", "2", "1", "60"]]),
+
     ("<html><body>No data</body></html>", [])
 ])
 def test_extract_data_from_html(html_content, expected_output):
@@ -31,19 +28,20 @@ def test_extract_data_from_html(html_content, expected_output):
     result = extract_data_from_html(html_content)
     assert result == expected_output
 
+
 @patch("main.boto3.client")
 def test_process_html_file(mock_boto):
     """Prueba el procesamiento de un archivo HTML desde S3."""
     mock_s3 = MagicMock()
     mock_boto.return_value = mock_s3
-    
+
     mock_s3.get_object.return_value = {
         "Body": MagicMock(read=lambda: b"<div class='listing-item'><div class='listing-location'>Chapinero</div></div>")
     }
-    
+
     with patch("builtins.open", MagicMock()):
         process_html_file("test-bucket", "test-key")
-    
+
     mock_s3.upload_file.assert_called_once()
 
 
@@ -67,17 +65,18 @@ def test_download_html_success():
         assert mock_s3.put_object.call_count == 10
         assert result["status"] == "ok"
 
+
 def test_download_html_failure():
     with patch("main.requests.Session.get", side_effect=requests.RequestException("Request failed")), \
          patch("main.boto3.client") as mock_boto, \
          patch("time.sleep", return_value=None):  # Parchear time.sleep para que no espere
-        
+
         mock_s3 = MagicMock()
         mock_boto.return_value = mock_s3
 
         result = download_html()
 
         # Verificar que no se subieron archivos a S3
-        assert mock_s3.put_object.call_count == 0  
+        assert mock_s3.put_object.call_count == 0
         # La función debe manejar errores sin fallar
         assert result["status"] == "ok"

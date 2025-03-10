@@ -4,7 +4,9 @@ import time
 from datetime import datetime
 from requests.exceptions import RequestException
 
+
 S3_BUCKET = "zappa-8jwijavgz"
+
 
 def download_html():
     url = "https://casas.mitula.com.co/casas/bogota"
@@ -38,11 +40,12 @@ def download_html():
                 attempt += 1
                 print(f"⚠ Error en página {i}, intento {attempt}: {e}")
                 time.sleep(2 ** attempt)  # Espera exponencial: 2s, 4s, 8s
-            
+
         if attempt == 3:
             print(f"❌ Falló la descarga de la página {i} después de 3 intentos")
 
     return {"status": "ok"}
+
 
 def lambda_handler(event, context):
     return download_html()
